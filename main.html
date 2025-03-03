@@ -26,13 +26,12 @@
             display: flex;
             flex-direction: column;
         }
-        textarea {
+        input, textarea {
             margin-bottom: 10px;
             padding: 10px;
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ccc;
-            resize: none;
         }
         button {
             padding: 10px;
@@ -50,7 +49,8 @@
 <body>
     <div id="commentForm">
         <h2>Deinen Kommentar abgeben:</h2>
-        <textarea id="commentText" rows="4" placeholder="Gib hier deinen Kommentar ein..."></textarea>
+        <input type="text" id="name" placeholder="Dein Name" required>
+        <textarea id="commentText" rows="4" placeholder="Gib hier deinen Kommentar ein..." required></textarea>
         <button id="submitComment">Kommentar absenden</button>
     </div>
     
@@ -61,20 +61,21 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        // Deine Supabase-URL und der API-Schlüssel
-        const SUPABASE_URL = 'https://prgobmwkgiycawjzyahw.supabase.co'; // Ändere dies zu deinem Supabase-URL
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ29ibXdrZ2l5Y2F3anp5YWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMjMxMTcsImV4cCI6MjA1NjU5OTExN30.gYwnkVb7JIiDeStFJe1rxstzME6Y11F0DJMguKwn9bc'; // Ändere dies zu deinem Supabase-API-Schlüssel
+        // Deine Supabase-URL und API-Schlüssel
+        const SUPABASE_URL = 'https://prgobmwkgiycawjzyahw.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ29ibXdrZ2l5Y2F3anp5YWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMjMxMTcsImV4cCI6MjA1NjU5OTExN30.gYwnkVb7JIiDeStFJe1rxstzME6Y11F0DJMguKwn9bc'; 
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Kommentar absenden
         document.getElementById('submitComment').addEventListener('click', async () => {
+            const name = document.getElementById('name').value;
             const commentText = document.getElementById('commentText').value;
-            if (commentText) {
+            if (name && commentText) {
                 // Kommentar in die Supabase-Datenbank einfügen
                 const { data, error } = await supabase
                     .from('comments')
                     .insert([
-                        { content: commentText }
+                        { name: name, text: commentText }
                     ]);
 
                 if (error) {
@@ -82,11 +83,12 @@
                     alert('Es gab ein Problem beim Absenden des Kommentars.');
                 } else {
                     // Kommentarfeld leeren und die Kommentare neu laden
+                    document.getElementById('name').value = '';
                     document.getElementById('commentText').value = '';
                     loadComments();
                 }
             } else {
-                alert('Bitte gebe einen Kommentar ein.');
+                alert('Bitte gebe sowohl einen Namen als auch einen Kommentar ein.');
             }
         });
 
@@ -94,7 +96,7 @@
         async function loadComments() {
             const { data, error } = await supabase
                 .from('comments')
-                .select('content')
+                .select('name, text')
                 .order('id', { ascending: false });
 
             if (error) {
@@ -107,10 +109,18 @@
 
             data.forEach(comment => {
                 const commentDiv = document.createElement('div');
-                commentDiv.textContent = comment.content;
                 commentDiv.style.padding = '10px';
                 commentDiv.style.borderBottom = '1px solid #ddd';
                 commentDiv.style.marginBottom = '10px';
+
+                const nameElement = document.createElement('strong');
+                nameElement.textContent = comment.name;
+                commentDiv.appendChild(nameElement);
+
+                const textElement = document.createElement('p');
+                textElement.textContent = comment.text;
+                commentDiv.appendChild(textElement);
+
                 commentsContainer.appendChild(commentDiv);
             });
         }
