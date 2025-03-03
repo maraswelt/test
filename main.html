@@ -7,19 +7,9 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
             display: flex;
             justify-content: space-between;
             padding: 20px;
-        }
-        #commentSection {
-            width: 45%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            height: 300px;
-            overflow-y: auto;
         }
         #commentForm {
             width: 45%;
@@ -44,9 +34,26 @@
         button:hover {
             background-color: #0056b3;
         }
+        #commentSection {
+            width: 45%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .comment {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .comment strong {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
+    <!-- Kommentarformular -->
     <div id="commentForm">
         <h2>Deinen Kommentar abgeben:</h2>
         <input type="text" id="name" placeholder="Dein Name" required>
@@ -54,16 +61,18 @@
         <button id="submitComment">Kommentar absenden</button>
     </div>
     
+    <!-- Kommentare anzeigen -->
     <div id="commentSection">
         <h2>Kommentare:</h2>
         <div id="commentsContainer"></div>
     </div>
 
+    <!-- Supabase JavaScript SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        // Deine Supabase-URL und API-Schlüssel
-        const SUPABASE_URL = 'https://prgobmwkgiycawjzyahw.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ29ibXdrZ2l5Y2F3anp5YWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMjMxMTcsImV4cCI6MjA1NjU5OTExN30.gYwnkVb7JIiDeStFJe1rxstzME6Y11F0DJMguKwn9bc'; 
+        // Supabase URL und API-Key (ersetze diese mit deinen echten Daten)
+        const SUPABASE_URL = 'https://mwsqhfkwzxmukrxjgajw.supabase.co'; // Deine Supabase-URL
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13c3FoZmt3enhtdWtyeGpnYWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMjYyMDQsImV4cCI6MjA1NjYwMjIwNH0.-c-n4FkrtbCeq4Bmiw_LaW812nLVkFkDC_cD5iZcZ4A'; // Dein Supabase API-Schlüssel
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Kommentar absenden
@@ -72,7 +81,7 @@
             const commentText = document.getElementById('commentText').value;
             if (name && commentText) {
                 try {
-                    // Kommentar in die Supabase-Datenbank einfügen
+                    // Kommentar in Supabase speichern
                     const { data, error } = await supabase
                         .from('comments')
                         .insert([
@@ -83,12 +92,10 @@
                         console.error('Fehler beim Hinzufügen des Kommentars:', error);
                         alert('Es gab ein Problem beim Absenden des Kommentars.');
                     } else {
-                        // Kommentar erfolgreich hinzugefügt, Ausgabe des Kommentars
-                        console.log('Kommentar erfolgreich hinzugefügt:', data);
-                        // Kommentarfeld leeren und die Kommentare neu laden
+                        // Kommentar erfolgreich gespeichert, Kommentarformular leeren
                         document.getElementById('name').value = '';
                         document.getElementById('commentText').value = '';
-                        loadComments();  // Kommentare neu laden
+                        loadComments();  // Lade alle Kommentare neu
                     }
                 } catch (error) {
                     console.error('Fehler beim Absenden des Kommentars:', error);
@@ -99,13 +106,13 @@
             }
         });
 
-        // Kommentare aus der Supabase-Datenbank laden
+        // Kommentare aus Supabase laden
         async function loadComments() {
             try {
                 const { data, error } = await supabase
                     .from('comments')
                     .select('name, text')
-                    .order('id', { ascending: false });
+                    .order('id', { ascending: false }); // Die neuesten Kommentare zuerst
 
                 if (error) {
                     console.error('Fehler beim Laden der Kommentare:', error);
@@ -118,12 +125,11 @@
                 if (data.length === 0) {
                     commentsContainer.innerHTML = '<p>Keine Kommentare vorhanden.</p>';
                 } else {
+                    // Kommentare anzeigen
                     data.forEach(comment => {
                         const commentDiv = document.createElement('div');
-                        commentDiv.style.padding = '10px';
-                        commentDiv.style.borderBottom = '1px solid #ddd';
-                        commentDiv.style.marginBottom = '10px';
-
+                        commentDiv.classList.add('comment');
+                        
                         const nameElement = document.createElement('strong');
                         nameElement.textContent = comment.name;
                         commentDiv.appendChild(nameElement);
