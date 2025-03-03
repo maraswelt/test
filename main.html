@@ -3,113 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kommentare</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
+    <title>Kommentarbereich</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
         }
-        #comment-form {
-            margin-bottom: 20px;
-        }
-        .comment {
-            margin-bottom: 10px;
+        #commentSection {
+            width: 45%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            width: 50%;
-            text-align: right; /* Kommentare nach rechts ausrichten */
-            margin-left: auto;
-            margin-right: auto;
+            height: 300px;
+            overflow-y: auto;
         }
-        #comments-list {
+        #commentForm {
+            width: 45%;
             display: flex;
-            flex-direction: column-reverse; /* Stellt sicher, dass die neuesten Kommentare oben sind */
-            align-items: flex-end; /* Kommentare rechtsbündig anzeigen */
-            margin-top: 20px;
+            flex-direction: column;
+        }
+        textarea {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            resize: none;
+        }
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
+    <div id="commentForm">
+        <h2>Deinen Kommentar abgeben:</h2>
+        <textarea id="commentText" rows="4" placeholder="Gib hier deinen Kommentar ein..."></textarea>
+        <button id="submitComment">Kommentar absenden</button>
+    </div>
+    
+    <div id="commentSection">
+        <h2>Kommentare:</h2>
+        <div id="commentsContainer"></div>
+    </div>
 
-    <h1>Kommentare</h1>
-
-    <form id="comment-form">
-        <label for="name">Name:</label>
-        <input type="text" id="name" required><br><br>
-
-        <label for="text">Kommentar:</label><br>
-        <textarea id="text" rows="4" required></textarea><br><br>
-
-        <button type="submit">Kommentar absenden</button>
-    </form>
-
-    <div id="comments-list"></div>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        // Supabase-URL und Anonymer API-Schlüssel
-        const supabaseUrl = 'https://prgobmwkgiycawjzyahw.supabase.co'; // Deine Supabase-URL
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ29ibXdrZ2l5Y2F3anp5YWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMjMxMTcsImV4cCI6MjA1NjU5OTExN30.gYwnkVb7JIiDeStFJe1rxstzME6Y11F0DJMguKwn9bc'; // Dein API-Schlüssel
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        // Deine Supabase-URL und der API-Schlüssel
+        const SUPABASE_URL = 'https://prgobmwkgiycawjzyahw.supabase.co'; // Ändere dies zu deinem Supabase-URL
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ29ibXdrZ2l5Y2F3anp5YWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMjMxMTcsImV4cCI6MjA1NjU5OTExN30.gYwnkVb7JIiDeStFJe1rxstzME6Y11F0DJMguKwn9bc'; // Ändere dies zu deinem Supabase-API-Schlüssel
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Funktion zum Laden der Kommentare
+        // Kommentar absenden
+        document.getElementById('submitComment').addEventListener('click', async () => {
+            const commentText = document.getElementById('commentText').value;
+            if (commentText) {
+                // Kommentar in die Supabase-Datenbank einfügen
+                const { data, error } = await supabase
+                    .from('comments')
+                    .insert([
+                        { content: commentText }
+                    ]);
+
+                if (error) {
+                    console.error('Fehler beim Hinzufügen des Kommentars:', error);
+                    alert('Es gab ein Problem beim Absenden des Kommentars.');
+                } else {
+                    // Kommentarfeld leeren und die Kommentare neu laden
+                    document.getElementById('commentText').value = '';
+                    loadComments();
+                }
+            } else {
+                alert('Bitte gebe einen Kommentar ein.');
+            }
+        });
+
+        // Kommentare aus der Supabase-Datenbank laden
         async function loadComments() {
-            let { data: comments, error } = await supabase
-                .from('comments')  // Tabelle zu 'test' geändert
-                .select('*')
-                .order('id', { ascending: false });  // Sortiert die Kommentare so, dass die neuesten oben erscheinen
+            const { data, error } = await supabase
+                .from('comments')
+                .select('content')
+                .order('id', { ascending: false });
 
             if (error) {
                 console.error('Fehler beim Laden der Kommentare:', error);
                 return;
             }
 
-            const commentsList = document.getElementById('comments-list');
-            commentsList.innerHTML = ''; // Lösche die bestehenden Kommentare
+            const commentsContainer = document.getElementById('commentsContainer');
+            commentsContainer.innerHTML = ''; // Container leeren
 
-            comments.forEach(comment => {
+            data.forEach(comment => {
                 const commentDiv = document.createElement('div');
-                commentDiv.classList.add('comment');
-                commentDiv.innerHTML = `
-                    <strong>${comment.name}</strong><br>
-                    ${comment.text}
-                `;
-                commentsList.appendChild(commentDiv);
+                commentDiv.textContent = comment.content;
+                commentDiv.style.padding = '10px';
+                commentDiv.style.borderBottom = '1px solid #ddd';
+                commentDiv.style.marginBottom = '10px';
+                commentsContainer.appendChild(commentDiv);
             });
         }
 
-        // Kommentar absenden
-        document.getElementById('comment-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const name = document.getElementById('name').value;
-            const text = document.getElementById('text').value;
-
-            if (!name || !text) {
-                alert('Bitte fülle alle Felder aus!');
-                return;
-            }
-
-            const { data, error } = await supabase
-                .from('comments')  // Tabelle zu 'test' geändert
-                .insert([{ name, text }]);
-
-            if (error) {
-                console.error('Fehler beim Absenden des Kommentars:', error);
-                return;
-            }
-
-            // Formular zurücksetzen
-            document.getElementById('comment-form').reset();
-
-            // Kommentare neu laden
-            loadComments();
-        });
-
-        // Beim Laden der Seite Kommentare anzeigen
+        // Kommentare beim Laden der Seite anzeigen
         loadComments();
     </script>
-
 </body>
 </html>
