@@ -49,14 +49,14 @@
 
     <script>
         // Supabase-URL und Anonymer API-Schlüssel
-        const supabaseUrl = 'https://prgobmwkgiycawjzyahw.supabase.co'; // Ersetze mit deiner URL
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ29ibXdrZ2l5Y2F3anp5YWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMjMxMTcsImV4cCI6MjA1NjU5OTExN30.gYwnkVb7JIiDeStFJe1rxstzME6Y11F0DJMguKwn9bc'; // Ersetze mit deinem API-Schlüssel
+        const supabaseUrl = 'https://prgobmwkgiycawjzyahw.supabase.co'; // Deine Supabase-URL
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ29ibXdrZ2l5Y2F3anp5YWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMjMxMTcsImV4cCI6MjA1NjU5OTExN30.gYwnkVb7JIiDeStFJe1rxstzME6Y11F0DJMguKwn9bc'; // Dein API-Schlüssel
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         // Funktion zum Laden der Kommentare
         async function loadComments() {
             let { data: comments, error } = await supabase
-                .from('comments')
+                .from('test')  // Tabelle zu 'test' geändert
                 .select('*')
                 .order('id', { ascending: false });  // Sortiert die Kommentare so, dass die neuesten oben erscheinen
 
@@ -92,7 +92,7 @@
             }
 
             const { data, error } = await supabase
-                .from('comments')
+                .from('test')  // Tabelle zu 'test' geändert
                 .insert([{ name, text }]);
 
             if (error) {
