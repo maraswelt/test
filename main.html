@@ -71,21 +71,28 @@
             const name = document.getElementById('name').value;
             const commentText = document.getElementById('commentText').value;
             if (name && commentText) {
-                // Kommentar in die Supabase-Datenbank einfügen
-                const { data, error } = await supabase
-                    .from('comments')
-                    .insert([
-                        { name: name, text: commentText }
-                    ]);
+                try {
+                    // Kommentar in die Supabase-Datenbank einfügen
+                    const { data, error } = await supabase
+                        .from('comments')
+                        .insert([
+                            { name: name, text: commentText }
+                        ]);
 
-                if (error) {
-                    console.error('Fehler beim Hinzufügen des Kommentars:', error);
+                    if (error) {
+                        console.error('Fehler beim Hinzufügen des Kommentars:', error);
+                        alert('Es gab ein Problem beim Absenden des Kommentars.');
+                    } else {
+                        // Kommentar erfolgreich hinzugefügt, Ausgabe des Kommentars
+                        console.log('Kommentar erfolgreich hinzugefügt:', data);
+                        // Kommentarfeld leeren und die Kommentare neu laden
+                        document.getElementById('name').value = '';
+                        document.getElementById('commentText').value = '';
+                        loadComments();  // Kommentare neu laden
+                    }
+                } catch (error) {
+                    console.error('Fehler beim Absenden des Kommentars:', error);
                     alert('Es gab ein Problem beim Absenden des Kommentars.');
-                } else {
-                    // Kommentarfeld leeren und die Kommentare neu laden
-                    document.getElementById('name').value = '';
-                    document.getElementById('commentText').value = '';
-                    loadComments();
                 }
             } else {
                 alert('Bitte gebe sowohl einen Namen als auch einen Kommentar ein.');
@@ -94,35 +101,43 @@
 
         // Kommentare aus der Supabase-Datenbank laden
         async function loadComments() {
-            const { data, error } = await supabase
-                .from('comments')
-                .select('name, text')
-                .order('id', { ascending: false });
+            try {
+                const { data, error } = await supabase
+                    .from('comments')
+                    .select('name, text')
+                    .order('id', { ascending: false });
 
-            if (error) {
+                if (error) {
+                    console.error('Fehler beim Laden der Kommentare:', error);
+                    return;
+                }
+
+                const commentsContainer = document.getElementById('commentsContainer');
+                commentsContainer.innerHTML = ''; // Container leeren
+
+                if (data.length === 0) {
+                    commentsContainer.innerHTML = '<p>Keine Kommentare vorhanden.</p>';
+                } else {
+                    data.forEach(comment => {
+                        const commentDiv = document.createElement('div');
+                        commentDiv.style.padding = '10px';
+                        commentDiv.style.borderBottom = '1px solid #ddd';
+                        commentDiv.style.marginBottom = '10px';
+
+                        const nameElement = document.createElement('strong');
+                        nameElement.textContent = comment.name;
+                        commentDiv.appendChild(nameElement);
+
+                        const textElement = document.createElement('p');
+                        textElement.textContent = comment.text;
+                        commentDiv.appendChild(textElement);
+
+                        commentsContainer.appendChild(commentDiv);
+                    });
+                }
+            } catch (error) {
                 console.error('Fehler beim Laden der Kommentare:', error);
-                return;
             }
-
-            const commentsContainer = document.getElementById('commentsContainer');
-            commentsContainer.innerHTML = ''; // Container leeren
-
-            data.forEach(comment => {
-                const commentDiv = document.createElement('div');
-                commentDiv.style.padding = '10px';
-                commentDiv.style.borderBottom = '1px solid #ddd';
-                commentDiv.style.marginBottom = '10px';
-
-                const nameElement = document.createElement('strong');
-                nameElement.textContent = comment.name;
-                commentDiv.appendChild(nameElement);
-
-                const textElement = document.createElement('p');
-                textElement.textContent = comment.text;
-                commentDiv.appendChild(textElement);
-
-                commentsContainer.appendChild(commentDiv);
-            });
         }
 
         // Kommentare beim Laden der Seite anzeigen
