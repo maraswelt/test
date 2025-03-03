@@ -56,7 +56,7 @@
         // Funktion zum Laden der Kommentare
         async function loadComments() {
             let { data: comments, error } = await supabase
-                .from('test')  // Tabelle zu 'test' geändert
+                .from('comments')  // Tabelle zu 'test' geändert
                 .select('*')
                 .order('id', { ascending: false });  // Sortiert die Kommentare so, dass die neuesten oben erscheinen
 
@@ -92,7 +92,7 @@
             }
 
             const { data, error } = await supabase
-                .from('test')  // Tabelle zu 'test' geändert
+                .from('comments')  // Tabelle zu 'test' geändert
                 .insert([{ name, text }]);
 
             if (error) {
