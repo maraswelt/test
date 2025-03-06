@@ -3,37 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login und Registrierung mit Firebase</title>
+    <title>Login & Registrierung</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            text-align: center;
+            animation: fadeIn 1s ease;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="email"], input[type="password"] {
+            padding: 15px;
+            background-color: #fff;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            font-size: 1rem;
+            color: #333;
+            transition: 0.3s ease-in-out;
+        }
+
+        input[type="email"]:focus, input[type="password"]:focus {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+
+        button {
+            padding: 15px;
+            background-color: #2575fc;
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #6a11cb;
+        }
+
+        .link {
+            color: #fff;
+            margin-top: 15px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <h1>Benutzerregistrierung und Anmeldung</h1>
-    
-    <!-- Registrierung Formular -->
-    <div>
-        <h2>Registrieren</h2>
-        <form id="registerForm">
-            <label for="registerEmail">E-Mail:</label>
-            <input type="email" id="registerEmail" required><br><br>
-            <label for="registerPassword">Passwort:</label>
-            <input type="password" id="registerPassword" required><br><br>
-            <button type="submit">Registrieren</button>
-        </form>
-    </div>
-    
-    <!-- Login Formular -->
-    <div>
-        <h2>Anmelden</h2>
-        <form id="loginForm">
-            <label for="loginEmail">E-Mail:</label>
-            <input type="email" id="loginEmail" required><br><br>
-            <label for="loginPassword">Passwort:</label>
-            <input type="password" id="loginPassword" required><br><br>
-            <button type="submit">Anmelden</button>
-        </form>
+    <div class="container">
+        <h1>Login & Registrierung</h1>
+        
+        <!-- Registrierung Formular -->
+        <div id="registerForm">
+            <h2>Registrieren</h2>
+            <form>
+                <input type="email" id="registerEmail" placeholder="E-Mail" required>
+                <input type="password" id="registerPassword" placeholder="Passwort" required>
+                <button type="submit" id="registerBtn">Registrieren</button>
+            </form>
+            <p>Bereits ein Konto? <a href="#" class="link" id="toLogin">Anmelden</a></p>
+        </div>
+        
+        <!-- Login Formular -->
+        <div id="loginForm" style="display: none;">
+            <h2>Anmelden</h2>
+            <form>
+                <input type="email" id="loginEmail" placeholder="E-Mail" required>
+                <input type="password" id="loginPassword" placeholder="Passwort" required>
+                <button type="submit" id="loginBtn">Anmelden</button>
+            </form>
+            <p>Kein Konto? <a href="#" class="link" id="toRegister">Konto erstellen</a></p>
+        </div>
     </div>
 
     <script>
@@ -53,7 +138,20 @@
         const auth = firebase.auth();
         const database = firebase.database();
 
-        // Registrierung Formular
+        // Wechsel zwischen Anmelde- und Registrierungsformular
+        document.getElementById("toLogin").addEventListener("click", function(event) {
+            event.preventDefault();
+            document.getElementById("registerForm").style.display = "none";
+            document.getElementById("loginForm").style.display = "block";
+        });
+
+        document.getElementById("toRegister").addEventListener("click", function(event) {
+            event.preventDefault();
+            document.getElementById("registerForm").style.display = "block";
+            document.getElementById("loginForm").style.display = "none";
+        });
+
+        // Registrierung Formular absenden
         document.getElementById("registerForm").addEventListener("submit", function(event) {
             event.preventDefault();
 
@@ -71,7 +169,7 @@
                             console.error("Fehler beim Senden der Bestätigungs-E-Mail:", error);
                         });
 
-                    // Benutzer in Realtime Database speichern
+                    // Benutzer in der Realtime Database speichern
                     const userRef = database.ref('users/' + user.uid);
                     userRef.set({
                         email: email,
@@ -85,7 +183,7 @@
                 });
         });
 
-        // Login Formular
+        // Login Formular absenden
         document.getElementById("loginForm").addEventListener("submit", function(event) {
             event.preventDefault();
 
