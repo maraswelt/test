@@ -8,10 +8,8 @@
     "messagingSenderId": "615765179356",
     "appId": "1:615765179356:web:97e52cfba0741ebb8c6d19"
   },
-  "firebaseRules": {
-    "rules": {
-      ".read": "true",
-      ".write": "true"
-    }
+  "loginRules": {
+    "emailExistenceCheck": "true",
+    "passwordComplexity": "true"
   }
 }
