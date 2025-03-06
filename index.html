@@ -15,7 +15,7 @@
             .then(response => response.json())
             .then(config => {
                 // Firebase-Konfiguration
-                const firebaseConfig = config;
+                const firebaseConfig = config.firebaseConfig;
 
                 // Firebase initialisieren
                 const app = initializeApp(firebaseConfig);
@@ -56,6 +56,12 @@
                         set(newCommentRef, {
                             username: username,
                             comment: commentText
+                        })
+                        .then(() => {
+                            console.log("Kommentar erfolgreich gespeichert!");
+                        })
+                        .catch(error => {
+                            console.error("Fehler beim Speichern des Kommentars:", error);
                         });
 
                         // Felder zurücksetzen
