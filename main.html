@@ -3,151 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kommentarbereich</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-        }
-        #commentForm {
-            width: 45%;
-            display: flex;
-            flex-direction: column;
-        }
-        input, textarea {
-            margin-bottom: 10px;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        button {
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #commentSection {
-            width: 45%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            height: 300px;
-            overflow-y: auto;
-        }
-        .comment {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 10px;
-        }
-        .comment strong {
-            font-size: 16px;
-        }
-    </style>
+    <title>Kommentare</title>
+    <!-- Firebase SDK einbinden -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js"></script>
 </head>
 <body>
-    <!-- Kommentarformular -->
-    <div id="commentForm">
-        <h2>Deinen Kommentar abgeben:</h2>
-        <input type="text" id="name" placeholder="Dein Name" required>
-        <textarea id="commentText" rows="4" placeholder="Gib hier deinen Kommentar ein..." required></textarea>
-        <button id="submitComment">Kommentar absenden</button>
-    </div>
+    <h1>Kommentare</h1>
     
-    <!-- Kommentare anzeigen -->
-    <div id="commentSection">
-        <h2>Kommentare:</h2>
-        <div id="commentsContainer"></div>
-    </div>
+    <!-- Formular zum Hinterlassen eines Kommentars -->
+    <form id="commentForm">
+        <label for="username">Name:</label>
+        <input type="text" id="username" required><br><br>
+        <label for="comment">Kommentar:</label><br>
+        <textarea id="comment" rows="4" cols="50" required></textarea><br><br>
+        <button type="submit">Kommentar absenden</button>
+    </form>
 
-    <!-- Supabase JavaScript SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <h2>Kommentare:</h2>
+    <div id="commentsContainer"></div>
+
+    <!-- Firebase initialisieren -->
     <script>
-        // Supabase URL und API-Key (ersetze diese mit deinen echten Daten)
-        const SUPABASE_URL = 'https://mwsqhfkwzxmukrxjgajw.supabase.co'; // Deine Supabase-URL
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13c3FoZmt3enhtdWtyeGpnYWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMjYyMDQsImV4cCI6MjA1NjYwMjIwNH0.-c-n4FkrtbCeq4Bmiw_LaW812nLVkFkDC_cD5iZcZ4A'; // Dein Supabase API-Schlüssel
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Firebase-Konfiguration (ersetze mit deinen eigenen Firebase-Config-Daten)
+        const firebaseConfig = {
+            apiKey: "DEIN_API_KEY",
+            authDomain: "DEIN_AUTH_DOMAIN",
+            databaseURL: "DEIN_DATABASE_URL",
+            projectId: "DEIN_PROJECT_ID",
+            storageBucket: "DEIN_STORAGE_BUCKET",
+            messagingSenderId: "DEIN_MESSAGING_SENDER_ID",
+            appId: "DEIN_APP_ID"
+        };
 
-        // Kommentar absenden
-        document.getElementById('submitComment').addEventListener('click', async () => {
-            const name = document.getElementById('name').value;
-            const commentText = document.getElementById('commentText').value;
-            if (name && commentText) {
-                try {
-                    // Kommentar in Supabase speichern
-                    const { data, error } = await supabase
-                        .from('comments')
-                        .insert([
-                            { name: name, text: commentText }
-                        ]);
+        // Firebase App initialisieren
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-                    if (error) {
-                        console.error('Fehler beim Hinzufügen des Kommentars:', error);
-                        alert('Es gab ein Problem beim Absenden des Kommentars.');
-                    } else {
-                        // Kommentar erfolgreich gespeichert, Kommentarformular leeren
-                        document.getElementById('name').value = '';
-                        document.getElementById('commentText').value = '';
-                        loadComments();  // Lade alle Kommentare neu
-                    }
-                } catch (error) {
-                    console.error('Fehler beim Absenden des Kommentars:', error);
-                    alert('Es gab ein Problem beim Absenden des Kommentars.');
+        // Kommentare anzeigen
+        function loadComments() {
+            const commentsRef = database.ref("comments");
+            commentsRef.on("value", (snapshot) => {
+                const comments = snapshot.val();
+                const commentsContainer = document.getElementById("commentsContainer");
+                commentsContainer.innerHTML = ""; // Alte Kommentare löschen
+
+                // Kommentare aus der Firebase-Datenbank holen und anzeigen
+                for (let id in comments) {
+                    const comment = comments[id];
+                    const div = document.createElement("div");
+                    div.innerHTML = `<strong>${comment.username}</strong>: <p>${comment.comment}</p><hr>`;
+                    commentsContainer.appendChild(div);
                 }
-            } else {
-                alert('Bitte gebe sowohl einen Namen als auch einen Kommentar ein.');
-            }
-        });
-
-        // Kommentare aus Supabase laden
-        async function loadComments() {
-            try {
-                const { data, error } = await supabase
-                    .from('comments')
-                    .select('name, text')
-                    .order('id', { ascending: false }); // Die neuesten Kommentare zuerst
-
-                if (error) {
-                    console.error('Fehler beim Laden der Kommentare:', error);
-                    return;
-                }
-
-                const commentsContainer = document.getElementById('commentsContainer');
-                commentsContainer.innerHTML = ''; // Container leeren
-
-                if (data.length === 0) {
-                    commentsContainer.innerHTML = '<p>Keine Kommentare vorhanden.</p>';
-                } else {
-                    // Kommentare anzeigen
-                    data.forEach(comment => {
-                        const commentDiv = document.createElement('div');
-                        commentDiv.classList.add('comment');
-                        
-                        const nameElement = document.createElement('strong');
-                        nameElement.textContent = comment.name;
-                        commentDiv.appendChild(nameElement);
-
-                        const textElement = document.createElement('p');
-                        textElement.textContent = comment.text;
-                        commentDiv.appendChild(textElement);
-
-                        commentsContainer.appendChild(commentDiv);
-                    });
-                }
-            } catch (error) {
-                console.error('Fehler beim Laden der Kommentare:', error);
-            }
+            });
         }
 
-        // Kommentare beim Laden der Seite anzeigen
         loadComments();
+
+        // Kommentar absenden
+        document.getElementById("commentForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const commentText = document.getElementById("comment").value;
+
+            if (username && commentText) {
+                const commentsRef = database.ref("comments");
+                commentsRef.push({
+                    username: username,
+                    comment: commentText
+                });
+
+                // Felder zurücksetzen
+                document.getElementById("username").value = "";
+                document.getElementById("comment").value = "";
+            }
+        });
     </script>
 </body>
 </html>
