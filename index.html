@@ -187,7 +187,7 @@
         <div class="neon"></div>
 
         <!-- Login Form -->
-        <h2>Login & Registrierung</h2>
+        <h2 id="formTitle">Login & Registrierung</h2>
 
         <!-- Authentifizierungsformular -->
         <form id="authForm">
@@ -210,6 +210,7 @@
         const switchForm = document.getElementById("switchForm");
         const loginButton = document.getElementById("loginButton");
         const registerButton = document.getElementById("registerButton");
+        const formTitle = document.getElementById("formTitle");
 
         // Wenn der Benutzer zum Registrierung-Form wechseln möchte
         switchForm.addEventListener("click", () => {
@@ -217,10 +218,12 @@
             if (isLogin) {
                 loginButton.style.display = "inline-block";
                 registerButton.style.display = "none";
+                formTitle.textContent = "Login";
                 switchForm.textContent = "Noch kein Konto? Jetzt registrieren!";
             } else {
                 loginButton.style.display = "none";
                 registerButton.style.display = "inline-block";
+                formTitle.textContent = "Konto erstellen";
                 switchForm.textContent = "Bereits ein Konto? Jetzt einloggen!";
             }
         });
