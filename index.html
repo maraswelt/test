@@ -5,27 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kommentare</title>
 
-    <!-- Firebase SDK einbinden -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js"></script>
-</head>
-<body>
-    <h1>Kommentare</h1>
-    
-    <!-- Formular zum Hinterlassen eines Kommentars -->
-    <form id="commentForm">
-        <label for="username">Name:</label>
-        <input type="text" id="username" required><br><br>
-        <label for="comment">Kommentar:</label><br>
-        <textarea id="comment" rows="4" cols="50" required></textarea><br><br>
-        <button type="submit">Kommentar absenden</button>
-    </form>
+    <!-- Firebase SDK einbinden (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+        import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
 
-    <h2>Kommentare:</h2>
-    <div id="commentsContainer"></div>
-
-    <!-- JavaScript zum Laden der Firebase-Konfiguration und Initialisieren von Firebase -->
-    <script>
         // Funktion zum Laden der Firebase-Konfiguration aus der config.json
         fetch('config.json')
             .then(response => response.json())
@@ -34,13 +18,13 @@
                 const firebaseConfig = config;
 
                 // Firebase initialisieren
-                const app = firebase.initializeApp(firebaseConfig);
-                const database = firebase.database();
+                const app = initializeApp(firebaseConfig);
+                const database = getDatabase(app);
 
                 // Kommentare laden
                 function loadComments() {
-                    const commentsRef = database.ref("comments");
-                    commentsRef.on("value", (snapshot) => {
+                    const commentsRef = ref(database, "comments");
+                    onValue(commentsRef, (snapshot) => {
                         const comments = snapshot.val();
                         const commentsContainer = document.getElementById("commentsContainer");
                         commentsContainer.innerHTML = ""; // Alte Kommentare löschen
@@ -67,9 +51,9 @@
                     const commentText = document.getElementById("comment").value;
 
                     if (username && commentText) {
-                        const commentsRef = database.ref("comments");
-                        const newCommentRef = commentsRef.push();
-                        newCommentRef.set({
+                        const commentsRef = ref(database, "comments");
+                        const newCommentRef = push(commentsRef);
+                        set(newCommentRef, {
                             username: username,
                             comment: commentText
                         });
@@ -84,5 +68,20 @@
                 console.error('Fehler beim Laden der Firebase-Konfiguration:', error);
             });
     </script>
+</head>
+<body>
+    <h1>Kommentare</h1>
+    
+    <!-- Formular zum Hinterlassen eines Kommentars -->
+    <form id="commentForm">
+        <label for="username">Name:</label>
+        <input type="text" id="username" required><br><br>
+        <label for="comment">Kommentar:</label><br>
+        <textarea id="comment" rows="4" cols="50" required></textarea><br><br>
+        <button type="submit">Kommentar absenden</button>
+    </form>
+
+    <h2>Kommentare:</h2>
+    <div id="commentsContainer"></div>
 </body>
 </html>
