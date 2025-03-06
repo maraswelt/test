@@ -8,7 +8,7 @@
     <!-- Firebase SDK einbinden -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
 
         // Firebase Konfiguration
         const firebaseConfig = {
@@ -53,6 +53,17 @@
                 .then((userCredential) => {
                     const user = userCredential.user;
                     console.log("Benutzer registriert:", user);
+
+                    // Bestätigungs-E-Mail senden
+                    sendEmailVerification(user)
+                        .then(() => {
+                            console.log("Bestätigungs-E-Mail gesendet.");
+                            alert("Registrierung erfolgreich! Bitte überprüfe deine E-Mails, um deine Adresse zu verifizieren.");
+                        })
+                        .catch((error) => {
+                            console.error("Fehler beim Senden der Bestätigungs-E-Mail:", error);
+                        });
+
                     window.location.href = "index.html"; // Weiterleitung nach erfolgreicher Registrierung
                 })
                 .catch((error) => {
