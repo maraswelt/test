@@ -3,91 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kommentare</title>
+    <title>Login & Registrierung</title>
 
-    <!-- Firebase SDK einbinden (Modular) -->
+    <!-- Firebase SDK einbinden -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
 
-        // Funktion zum Laden der Firebase-Konfiguration aus der config.json
-        fetch('config.json')
-            .then(response => response.json())
-            .then(config => {
-                // Firebase-Konfiguration
-                const firebaseConfig = config.firebaseConfig;
+        // Firebase Konfiguration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQuc4HvfX4NHl98NT_6VOs4OcquNSVGQM",
+            authDomain: "test-7ab6b.firebaseapp.com",
+            databaseURL: "https://test-7ab6b-default-rtdb.firebaseio.com",
+            projectId: "test-7ab6b",
+            storageBucket: "test-7ab6b.firebasestorage.app",
+            messagingSenderId: "615765179356",
+            appId: "1:615765179356:web:97e52cfba0741ebb8c6d19"
+        };
 
-                // Firebase initialisieren
-                const app = initializeApp(firebaseConfig);
-                const database = getDatabase(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-                // Kommentare laden
-                function loadComments() {
-                    const commentsRef = ref(database, "comments");
-                    onValue(commentsRef, (snapshot) => {
-                        const comments = snapshot.val();
-                        const commentsContainer = document.getElementById("commentsContainer");
-                        commentsContainer.innerHTML = ""; // Alte Kommentare löschen
+        // Funktionen für Login und Registrierung
+        function loginUser(event) {
+            event.preventDefault();
 
-                        if (comments) {
-                            // Kommentare aus der Firebase-Datenbank holen und anzeigen
-                            for (let id in comments) {
-                                const comment = comments[id];
-                                const div = document.createElement("div");
-                                div.innerHTML = `<strong>${comment.username}</strong>: <p>${comment.comment}</p><hr>`;
-                                commentsContainer.appendChild(div);
-                            }
-                        }
-                    });
-                }
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
-                loadComments();
-
-                // Kommentar absenden
-                document.getElementById("commentForm").addEventListener("submit", function(event) {
-                    event.preventDefault();
-
-                    const username = document.getElementById("username").value;
-                    const commentText = document.getElementById("comment").value;
-
-                    if (username && commentText) {
-                        const commentsRef = ref(database, "comments");
-                        const newCommentRef = push(commentsRef);
-                        set(newCommentRef, {
-                            username: username,
-                            comment: commentText
-                        })
-                        .then(() => {
-                            console.log("Kommentar erfolgreich gespeichert!");
-                        })
-                        .catch(error => {
-                            console.error("Fehler beim Speichern des Kommentars:", error);
-                        });
-
-                        // Felder zurücksetzen
-                        document.getElementById("username").value = "";
-                        document.getElementById("comment").value = "";
-                    }
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("Angemeldeter Benutzer:", user);
+                    window.location.href = "index.html"; // Weiterleitung nach erfolgreichem Login
+                })
+                .catch((error) => {
+                    const errorMessage = error.message;
+                    document.getElementById("errorMessage").textContent = "Fehler: " + errorMessage;
                 });
-            })
-            .catch(error => {
-                console.error('Fehler beim Laden der Firebase-Konfiguration:', error);
-            });
+        }
+
+        function registerUser(event) {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("Benutzer registriert:", user);
+                    window.location.href = "index.html"; // Weiterleitung nach erfolgreicher Registrierung
+                })
+                .catch((error) => {
+                    const errorMessage = error.message;
+                    document.getElementById("errorMessage").textContent = "Fehler: " + errorMessage;
+                });
+        }
     </script>
+
+    <style>
+        /* Global Styles */
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .login-container {
+            position: relative;
+            padding: 40px;
+            background: #111;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+            text-align: center;
+            width: 400px;
+            height: 500px;
+        }
+
+        .login-container h2 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 2em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Neon Animation */
+        .neon {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            z-index: -1;
+            background: linear-gradient(45deg, #00f, #0ff, #0f0, #ff0, #f00);
+            background-size: 400% 400%;
+            animation: neon 4s ease infinite;
+            border-radius: 15px;
+            filter: blur(8px);
+        }
+
+        @keyframes neon {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Input Fields */
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border: 2px solid #0ff;
+            background-color: #222;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #ff0;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #0ff;
+            border: none;
+            color: #222;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #ff0;
+            color: #222;
+        }
+
+        /* Error Message */
+        #errorMessage {
+            color: red;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        /* Link Styles */
+        .switch {
+            color: #0ff;
+            font-size: 1rem;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .login-container {
+                width: 80%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Kommentare</h1>
-    
-    <!-- Formular zum Hinterlassen eines Kommentars -->
-    <form id="commentForm">
-        <label for="username">Name:</label>
-        <input type="text" id="username" required><br><br>
-        <label for="comment">Kommentar:</label><br>
-        <textarea id="comment" rows="4" cols="50" required></textarea><br><br>
-        <button type="submit">Kommentar absenden</button>
-    </form>
 
-    <h2>Kommentare:</h2>
-    <div id="commentsContainer"></div>
+    <div class="login-container">
+        <!-- Neon Effect Box -->
+        <div class="neon"></div>
+
+        <!-- Login Form -->
+        <h2>Login & Registrierung</h2>
+
+        <!-- Authentifizierungsformular -->
+        <form id="authForm">
+            <input type="email" id="email" placeholder="E-Mail" required>
+            <input type="password" id="password" placeholder="Passwort" required>
+            <button class="btn" id="loginButton" type="submit">Login</button>
+            <button class="btn" id="registerButton" style="display:none;" type="submit">Konto erstellen</button>
+        </form>
+
+        <p id="errorMessage"></p>
+
+        <p class="switch" id="switchForm">Noch kein Konto? Jetzt registrieren!</p>
+    </div>
+
+    <script>
+        // Wechsel zwischen Login und Registrierung
+        let isLogin = true;
+
+        const authForm = document.getElementById("authForm");
+        const switchForm = document.getElementById("switchForm");
+        const loginButton = document.getElementById("loginButton");
+        const registerButton = document.getElementById("registerButton");
+
+        // Wenn der Benutzer zum Registrierung-Form wechseln möchte
+        switchForm.addEventListener("click", () => {
+            isLogin = !isLogin;
+            if (isLogin) {
+                loginButton.style.display = "inline-block";
+                registerButton.style.display = "none";
+                switchForm.textContent = "Noch kein Konto? Jetzt registrieren!";
+            } else {
+                loginButton.style.display = "none";
+                registerButton.style.display = "inline-block";
+                switchForm.textContent = "Bereits ein Konto? Jetzt einloggen!";
+            }
+        });
+
+        // Login und Registrierung je nach Zustand der Form
+        authForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            if (isLogin) {
+                loginUser(event);
+            } else {
+                registerUser(event);
+            }
+        });
+    </script>
+
 </body>
 </html>
