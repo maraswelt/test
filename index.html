@@ -71,85 +71,95 @@
   </section>
 
   <script>
-    // Firebase Konfiguration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDQuc4HvfX4NHl98NT_6VOs4OcquNSVGQM",
-      authDomain: "test-7ab6b.firebaseapp.com",
-      databaseURL: "https://test-7ab6b-default-rtdb.firebaseio.com",
-      projectId: "test-7ab6b",
-      storageBucket: "test-7ab6b.firebasestorage.app",
-      messagingSenderId: "615765179356",
-      appId: "1:615765179356:web:97e52cfba0741ebb8c6d19"
-    };
+    // Funktion zum Laden der Firebase-Konfiguration aus der d.json
+    async function loadFirebaseConfig() {
+      try {
+        const response = await fetch('d.json');
+        const config = await response.json();
 
-    // Firebase initialisieren
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // Funktion, um zum Registrierungsformular zu wechseln
-    function switchToSignup() {
-      document.getElementById("loginForm").style.display = "none";
-      document.getElementById("signupForm").style.display = "block";
-      document.getElementById("errorMessage").style.display = "none";
-      document.getElementById("verificationMessage").style.display = "none";
+        // Firebase initialisieren
+        const app = firebase.initializeApp(config);
+        const auth = firebase.auth();
+        initializeForm(auth); // Funktion zum Initialisieren des Formulars nach Firebase Setup
+      } catch (error) {
+        console.error('Fehler beim Laden der Firebase-Konfiguration:', error);
+      }
     }
 
-    // Funktion, um zurück zum Login-Formular zu wechseln
-    function switchToLogin() {
-      document.getElementById("signupForm").style.display = "none";
-      document.getElementById("loginForm").style.display = "block";
-      document.getElementById("errorMessage").style.display = "none";
-      document.getElementById("verificationMessage").style.display = "none";
-    }
-
-    // JavaScript für Passwortvalidierung bei der Registrierung und Firebase-Registrierung
-    function validatePassword(event) {
-      event.preventDefault();  // Verhindert das Absenden des Formulars
-
-      var email = document.getElementById("email").value;
-      var password = document.getElementById("password").value;
-      var confirmPassword = document.getElementById("confirmPassword").value;
-
-      // Überprüfen, ob alle Felder ausgefüllt sind
-      if (email === "" || password === "" || confirmPassword === "") {
-        document.getElementById("errorMessage").innerHTML = "Bitte füllen Sie alle Felder aus!";
-        document.getElementById("errorMessage").style.display = "block";
+    // Formular-Logik
+    function initializeForm(auth) {
+      // Funktion, um zum Registrierungsformular zu wechseln
+      function switchToSignup() {
+        document.getElementById("loginForm").style.display = "none";
+        document.getElementById("signupForm").style.display = "block";
+        document.getElementById("errorMessage").style.display = "none";
         document.getElementById("verificationMessage").style.display = "none";
-        return false;
       }
 
-      // Überprüfen, ob die Passwörter übereinstimmen
-      if (password !== confirmPassword) {
-        document.getElementById("errorMessage").innerHTML = "Die Passwörter stimmen nicht überein!";
-        document.getElementById("errorMessage").style.display = "block";
+      // Funktion, um zurück zum Login-Formular zu wechseln
+      function switchToLogin() {
+        document.getElementById("signupForm").style.display = "none";
+        document.getElementById("loginForm").style.display = "block";
+        document.getElementById("errorMessage").style.display = "none";
         document.getElementById("verificationMessage").style.display = "none";
-        return false;
       }
 
-      // Firebase-Registrierung
-      auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          // Benutzer wurde erfolgreich erstellt
-          const user = userCredential.user;
+      // Passwortvalidierung und Firebase Registrierung
+      function validatePassword(event) {
+        event.preventDefault();  // Verhindert das Absenden des Formulars
 
-          // E-Mail-Bestätigung senden
-          user.sendEmailVerification()
-            .then(() => {
-              // Zeige die Verifizierungsnachricht
-              document.getElementById("signupForm").style.display = "none";
-              document.getElementById("verifiedEmail").innerText = email; // Zeige die eingegebene E-Mail an
-              document.getElementById("verificationMessage").style.display = "block";
-            })
-            .catch((error) => {
-              document.getElementById("errorMessage").innerHTML = "Fehler beim Senden der Bestätigungs-E-Mail: " + error.message;
-              document.getElementById("errorMessage").style.display = "block";
-            });
-        })
-        .catch((error) => {
-          document.getElementById("errorMessage").innerHTML = "Fehler bei der Registrierung: " + error.message;
+        var email = document.getElementById("email").value;
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirmPassword").value;
+
+        // Überprüfen, ob alle Felder ausgefüllt sind
+        if (email === "" || password === "" || confirmPassword === "") {
+          document.getElementById("errorMessage").innerHTML = "Bitte füllen Sie alle Felder aus!";
           document.getElementById("errorMessage").style.display = "block";
-        });
+          document.getElementById("verificationMessage").style.display = "none";
+          return false;
+        }
+
+        // Überprüfen, ob die Passwörter übereinstimmen
+        if (password !== confirmPassword) {
+          document.getElementById("errorMessage").innerHTML = "Die Passwörter stimmen nicht überein!";
+          document.getElementById("errorMessage").style.display = "block";
+          document.getElementById("verificationMessage").style.display = "none";
+          return false;
+        }
+
+        // Firebase-Registrierung
+        auth.createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            // Benutzer wurde erfolgreich erstellt
+            const user = userCredential.user;
+
+            // E-Mail-Bestätigung senden
+            user.sendEmailVerification()
+              .then(() => {
+                // Zeige die Verifizierungsnachricht
+                document.getElementById("signupForm").style.display = "none";
+                document.getElementById("verifiedEmail").innerText = email; // Zeige die eingegebene E-Mail an
+                document.getElementById("verificationMessage").style.display = "block";
+              })
+              .catch((error) => {
+                document.getElementById("errorMessage").innerHTML = "Fehler beim Senden der Bestätigungs-E-Mail: " + error.message;
+                document.getElementById("errorMessage").style.display = "block";
+              });
+          })
+          .catch((error) => {
+            document.getElementById("errorMessage").innerHTML = "Fehler bei der Registrierung: " + error.message;
+            document.getElementById("errorMessage").style.display = "block";
+          });
+      }
+
+      // Eventlistener hinzufügen, sobald Firebase konfiguriert ist
+      document.querySelector('input[type="submit"]').addEventListener('click', validatePassword);
+      document.querySelector('a').addEventListener('click', switchToSignup);
     }
+
+    // Lade die Firebase-Konfiguration und initialisiere das Formular
+    loadFirebaseConfig();
   </script>
 </body>
 
