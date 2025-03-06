@@ -3,253 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login & Registrierung</title>
-
-    <!-- Firebase SDK einbinden -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
-
-        // Firebase Konfiguration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDQuc4HvfX4NHl98NT_6VOs4OcquNSVGQM",
-            authDomain: "test-7ab6b.firebaseapp.com",
-            databaseURL: "https://test-7ab6b-default-rtdb.firebaseio.com",
-            projectId: "test-7ab6b",
-            storageBucket: "test-7ab6b.firebasestorage.app",
-            messagingSenderId: "615765179356",
-            appId: "1:615765179356:web:97e52cfba0741ebb8c6d19"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // Funktionen für Login und Registrierung
-        function loginUser(event) {
-            event.preventDefault();
-
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log("Angemeldeter Benutzer:", user);
-                    window.location.href = "index.html"; // Weiterleitung nach erfolgreichem Login
-                })
-                .catch((error) => {
-                    const errorMessage = error.message;
-                    document.getElementById("errorMessage").textContent = "Fehler: " + errorMessage;
-                });
-        }
-
-        function registerUser(event) {
-            event.preventDefault();
-
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log("Benutzer registriert:", user);
-
-                    // Bestätigungs-E-Mail senden
-                    sendEmailVerification(user)
-                        .then(() => {
-                            console.log("Bestätigungs-E-Mail gesendet.");
-                            alert("Registrierung erfolgreich! Bitte überprüfe deine E-Mails, um deine Adresse zu verifizieren.");
-                        })
-                        .catch((error) => {
-                            console.error("Fehler beim Senden der Bestätigungs-E-Mail:", error);
-                        });
-
-                    window.location.href = "index.html"; // Weiterleitung nach erfolgreicher Registrierung
-                })
-                .catch((error) => {
-                    const errorMessage = error.message;
-                    document.getElementById("errorMessage").textContent = "Fehler: " + errorMessage;
-                });
-        }
-    </script>
-
+    <title>Login</title>
     <style>
-        /* Global Styles */
         body {
-            background-color: #000;
+            font-family: 'Arial', sans-serif;
+            background-color: #101010;
+            color: white;
+            text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            font-family: 'Arial', sans-serif;
         }
-
         .login-container {
-            position: relative;
+            background: #1c1c1c;
             padding: 40px;
-            background: #111;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
-            text-align: center;
-            width: 400px;
-            height: 500px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;
         }
-
-        .login-container h2 {
-            color: #fff;
+        h1 {
             margin-bottom: 20px;
-            font-size: 2em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
         }
-
-        /* Neon Animation */
-        .neon {
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            z-index: -1;
-            background: linear-gradient(45deg, #00f, #0ff, #0f0, #ff0, #f00);
-            background-size: 400% 400%;
-            animation: neon 4s ease infinite;
-            border-radius: 15px;
-            filter: blur(8px);
-        }
-
-        @keyframes neon {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* Input Fields */
-        input {
+        input[type="email"], input[type="password"] {
             width: 100%;
-            padding: 15px;
-            margin: 15px 0;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #444;
             border-radius: 5px;
-            border: 2px solid #0ff;
-            background-color: #222;
-            color: #fff;
-            font-size: 1rem;
-            text-align: center;
-            outline: none;
+            background: #333;
+            color: white;
         }
-
-        input:focus {
-            border-color: #ff0;
-        }
-
-        /* Buttons */
-        .btn {
+        button {
             width: 100%;
-            padding: 15px;
-            background-color: #0ff;
+            padding: 10px;
+            margin: 10px 0;
             border: none;
-            color: #222;
-            font-size: 1.2rem;
+            background-color: #3498db;
+            color: white;
             border-radius: 5px;
             cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
         }
-
-        .btn:hover {
-            background-color: #ff0;
-            color: #222;
-        }
-
-        /* Error Message */
-        #errorMessage {
-            color: red;
-            font-size: 1rem;
-            margin-top: 10px;
-        }
-
-        /* Link Styles */
-        .switch {
-            color: #0ff;
-            font-size: 1rem;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .login-container {
-                width: 80%;
-            }
+        button:hover {
+            background-color: #2980b9;
         }
     </style>
 </head>
 <body>
-
     <div class="login-container">
-        <!-- Neon Effect Box -->
-        <div class="neon"></div>
-
-        <!-- Login Form -->
-        <h2 id="formTitle">Login & Registrierung</h2>
-
-        <!-- Authentifizierungsformular -->
-        <form id="authForm">
+        <h1>Login</h1>
+        <form id="loginForm">
             <input type="email" id="email" placeholder="E-Mail" required>
             <input type="password" id="password" placeholder="Passwort" required>
-            <button class="btn" id="loginButton" type="submit">Login</button>
-            <button class="btn" id="registerButton" style="display:none;" type="submit">Konto erstellen</button>
+            <button type="submit">Anmelden</button>
+            <p>Kein Konto? <a href="#" onclick="document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block';">Konto erstellen</a></p>
         </form>
-
-        <p id="errorMessage"></p>
-
-        <p class="switch" id="switchForm">Noch kein Konto? Jetzt registrieren!</p>
+        
+        <!-- Registrierungsformular -->
+        <form id="registerForm" style="display:none;">
+            <input type="email" id="registerEmail" placeholder="E-Mail" required>
+            <input type="password" id="registerPassword" placeholder="Passwort" required>
+            <button type="submit">Konto erstellen</button>
+            <p>Bereits ein Konto? <a href="#" onclick="document.getElementById('registerForm').style.display = 'none'; document.getElementById('loginForm').style.display = 'block';">Einloggen</a></p>
+        </form>
     </div>
 
-    <script>
-        // Wechsel zwischen Login und Registrierung
-        let isLogin = true;
+    <!-- Firebase SDK (modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
 
-        const authForm = document.getElementById("authForm");
-        const switchForm = document.getElementById("switchForm");
-        const loginButton = document.getElementById("loginButton");
-        const registerButton = document.getElementById("registerButton");
-        const formTitle = document.getElementById("formTitle");
+        // Firebase-Konfiguration laden
+        fetch('config.json')
+            .then(response => response.json())
+            .then(config => {
+                const firebaseConfig = config.firebaseConfig;
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
 
-        // Wenn der Benutzer zum Registrierung-Form wechseln möchte
-        switchForm.addEventListener("click", () => {
-            isLogin = !isLogin;
-            if (isLogin) {
-                loginButton.style.display = "inline-block";
-                registerButton.style.display = "none";
-                formTitle.textContent = "Login";
-                switchForm.textContent = "Noch kein Konto? Jetzt registrieren!";
-            } else {
-                loginButton.style.display = "none";
-                registerButton.style.display = "inline-block";
-                formTitle.textContent = "Konto erstellen";
-                switchForm.textContent = "Bereits ein Konto? Jetzt einloggen!";
-            }
-        });
+                // Anmeldefunktion
+                document.getElementById("loginForm").addEventListener("submit", function(event) {
+                    event.preventDefault();
+                    const email = document.getElementById("email").value;
+                    const password = document.getElementById("password").value;
 
-        // Login und Registrierung je nach Zustand der Form
-        authForm.addEventListener("submit", (event) => {
-            event.preventDefault();
+                    signInWithEmailAndPassword(auth, email, password)
+                        .then((userCredential) => {
+                            const user = userCredential.user;
+                            console.log("Erfolgreich eingeloggt:", user);
+                        })
+                        .catch((error) => {
+                            const errorCode = error.code;
+                            const errorMessage = error.message;
+                            alert("Fehler beim Einloggen: " + errorMessage);
+                        });
+                });
 
-            if (isLogin) {
-                loginUser(event);
-            } else {
-                registerUser(event);
-            }
-        });
+                // Registrierungsfunktion
+                document.getElementById("registerForm").addEventListener("submit", function(event) {
+                    event.preventDefault();
+                    const email = document.getElementById("registerEmail").value;
+                    const password = document.getElementById("registerPassword").value;
+
+                    createUserWithEmailAndPassword(auth, email, password)
+                        .then((userCredential) => {
+                            const user = userCredential.user;
+                            console.log("Konto erfolgreich erstellt:", user);
+
+                            // Bestätigungs-E-Mail senden
+                            sendEmailVerification(user)
+                                .then(() => {
+                                    alert("Registrierung erfolgreich! Bitte bestätige deine E-Mail.");
+                                })
+                                .catch((error) => {
+                                    console.error("Fehler beim Senden der Bestätigungs-E-Mail:", error);
+                                });
+                        })
+                        .catch((error) => {
+                            const errorCode = error.code;
+                            const errorMessage = error.message;
+                            alert("Fehler bei der Registrierung: " + errorMessage);
+                        });
+                });
+            });
     </script>
-
 </body>
 </html>
